@@ -1,6 +1,6 @@
+import axios from "axios";
 import RedisClient from "../clients/RedisClient";
 import { getProviderResponse } from "../clients/providerClient";
-import { callCallbackUrl } from "../clients/callbackUrlClient";
 import { ConsumeInput, ProviderOutput } from "../types";
 import { isStatusOk } from "../utils";
 
@@ -11,11 +11,15 @@ export default class WebhookService {
         this.redisClient = new RedisClient();
     }
 
-    async sendPayload({ provider, callbackUrl }: ConsumeInput) {
+    private async sendToCallbackUrl(callbackUrl: string, data: ProviderOutput) {
+        return axios.post(callbackUrl, data);
+    }
+
+    sendPayload = async ({ provider, callbackUrl }: ConsumeInput) => {
         const providerResponse = await getProviderResponse(provider);
         const dataToSend: ProviderOutput = isStatusOk(providerResponse.status)
             ? providerResponse.data
             : await this.redisClient.getCachedProviderResponse(provider);
-        await callCallbackUrl(callbackUrl, dataToSend);
-    }
+        return this.sendToCallbackUrl(callbackUrl, dataToSend);
+    };
 }

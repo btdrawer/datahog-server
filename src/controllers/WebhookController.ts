@@ -10,12 +10,15 @@ export default class WebhookController {
         this.webhookService = new WebhookService();
     }
 
-    async consume(req: Request, res: Response) {
+    consume = async (req: Request, res: Response) => {
         const { body } = req;
         if (!isConsumeInput(body)) {
             return sendHttpError(res, 400, "Request body was invalid.");
         }
-        this.webhookService.sendPayload(body);
-        return res.status(200);
-    }
+        const [response, _] = await Promise.all([
+            res.status(200).send(),
+            this.webhookService.sendPayload(body),
+        ]);
+        return response;
+    };
 }

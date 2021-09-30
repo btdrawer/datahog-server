@@ -5,7 +5,7 @@ import { Provider, ProviderOutput } from "../types";
 type ProviderAxiosResponse = Promise<AxiosResponse<ProviderOutput>>;
 
 const buildUri = (endpoint: string): string => {
-    return `${PROVIDER_HOST}:${PROVIDER_PORT}${endpoint}`;
+    return `${PROVIDER_HOST}:${PROVIDER_PORT}/providers${endpoint}`;
 };
 
 const getGas = async (): ProviderAxiosResponse => axios.get(buildUri("/gas"));
