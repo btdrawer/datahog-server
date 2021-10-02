@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { handleError, HttpError } from "../utils/HttpError";
 import WebhookService from "../services/WebhookService";
 import { isConsumeInput } from "../types";
-import { sendHttpError } from "../utils";
 
 export default class WebhookController {
     webhookService: WebhookService;
@@ -13,7 +13,12 @@ export default class WebhookController {
     consume = async (req: Request, res: Response) => {
         const { body } = req;
         if (!isConsumeInput(body)) {
-            return sendHttpError(res, 400, "Request body was invalid.");
+            return handleError(
+                HttpError.badRequest(
+                    `Request body was invalid: ${JSON.stringify(body)}`
+                ),
+                res
+            );
         }
         const [response, _] = await Promise.all([
             res.status(200).send(),

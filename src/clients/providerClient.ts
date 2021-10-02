@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { PROVIDER_HOST, PROVIDER_PORT } from "../config";
+import { PROVIDER_HOST, PROVIDER_PORT } from "../utils/config";
 import { Provider, ProviderOutput } from "../types";
 
 type ProviderAxiosResponse = Promise<AxiosResponse<ProviderOutput>>;

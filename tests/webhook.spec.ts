@@ -1,19 +1,21 @@
-import Redis from "ioredis";
 import request from "supertest";
 import nock from "nock";
 import { promisify } from "util";
 import app from "../src/app";
+import RedisClient from "../src/clients/RedisClient";
 
 const setTimeoutPromise = promisify(setTimeout);
 
 const exampleEvent = [
     {
-        billedOn: "",
+        billedOn: "2021-01-01T10:00:00Z",
         amount: 15.92,
     },
 ];
 
 describe("Webhook", () => {
+    const redisClient = new RedisClient();
+
     it("should send body from internet provider to callback url", async () => {
         nock("http://localhost:3000")
             .get("/providers/internet")
@@ -71,8 +73,6 @@ describe("Webhook", () => {
     it("should send cached body when provider is unavailable", async () => {
         nock("http://localhost:3000").get("/providers/gas").reply(500);
 
-        jest.spyOn(Redis.prototype, "get").mockResolvedValue(exampleEvent);
-
         let requestBody = {};
         nock("http://localhost:3002")
             .post("/")
@@ -89,7 +89,6 @@ describe("Webhook", () => {
             .then(async (response) => {
                 expect(response.statusCode).toEqual(200);
                 await setTimeoutPromise(1000);
-                expect(Redis.prototype.get).toHaveBeenCalledTimes(1);
                 expect(requestBody).toEqual(exampleEvent);
             });
     });
