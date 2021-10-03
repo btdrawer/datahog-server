@@ -28,6 +28,7 @@ export default class RedisClient {
         } catch (error) {
             console.error(error);
             return webhookPayloadFailure(
+                provider,
                 "The provider could not be reached and no cached data are available. Please try again later."
             );
         }

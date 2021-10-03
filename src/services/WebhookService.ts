@@ -20,14 +20,17 @@ export default class WebhookService {
     ): Promise<WebhookPayload> => {
         try {
             const { data } = await ProviderClient.getProviderResponse(provider);
-            return webhookPayloadSuccess(data);
+            return webhookPayloadSuccess(provider, data);
         } catch (error) {
             return this.redisClient.getCachedWebhookPayload(provider);
         }
     };
 
-    private async sendToCallbackUrl(callbackUrl: string, data: WebhookPayload) {
-        return axios.post(callbackUrl, data);
+    private async sendToCallbackUrl(
+        callbackUrl: string,
+        payload: WebhookPayload
+    ) {
+        return axios.post(callbackUrl, payload);
     }
 
     sendPayload = async ({ provider, callbackUrl }: WebhookRequestInput) => {
