@@ -1,7 +1,7 @@
 {
     "name": "datahog-server",
     "version": "1.0.0",
-    "description": "",
+    "description": "A server that receives requests from clients for gas and internet bills. The server requests the relevant data from the provider, and then sends it back to the client in the form of a webhook.",
     "main": "lib/runner.js",
     "scripts": {
         "build": "tsc",
@@ -11,7 +11,7 @@
         "coverage": "npm run start && jest --coverage --forceExit"
     },
     "keywords": [],
-    "author": "",
+    "author": "Ben Drawer",
     "license": "ISC",
     "devDependencies": {
         "@types/express": "^4.17.13",
