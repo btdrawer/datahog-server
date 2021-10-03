@@ -1,8 +1,8 @@
 import express from "express";
-import Controller from "./controllers/WebhookController";
+import WebhookController from "./controllers/WebhookController";
 
 const app = express();
-const webhookController = new Controller();
+const webhookController = new WebhookController();
 
 app.use(express.json());
 

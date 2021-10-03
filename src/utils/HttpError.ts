@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-export class HttpError extends Error {
+export default class HttpError extends Error {
     statusCode: number;
     message: string;
 
@@ -10,12 +10,9 @@ export class HttpError extends Error {
         this.message = message;
     }
 
-    static toHttpError(error: Error): HttpError {
-        if (error instanceof HttpError) {
-            return error;
-        }
-        console.error(error);
-        return HttpError.internalServerError();
+    static send(error: HttpError, res: Response) {
+        const { statusCode, message } = error;
+        return res.status(statusCode).send(message);
     }
 
     static badRequest(message: string) {
@@ -27,15 +24,4 @@ export class HttpError extends Error {
     ): HttpError {
         return new HttpError(404, message);
     }
-
-    static internalServerError(
-        message: string = "An internal error occurred."
-    ): HttpError {
-        return new HttpError(500, message);
-    }
-}
-
-export function handleError(err: Error, res: Response) {
-    const { statusCode, message } = HttpError.toHttpError(err);
-    return res.status(statusCode).send(message);
 }

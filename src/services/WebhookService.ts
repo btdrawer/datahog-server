@@ -1,7 +1,12 @@
 import axios from "axios";
 import RedisClient from "../clients/RedisClient";
-import { getProviderResponse } from "../clients/providerClient";
-import { ConsumeInput, Provider, ProviderOutput } from "../types";
+import ProviderClient from "../clients/ProviderClient";
+import {
+    WebhookRequestInput,
+    Provider,
+    WebhookPayload,
+    webhookPayloadSuccess,
+} from "../types";
 
 export default class WebhookService {
     redisClient: RedisClient;
@@ -10,33 +15,29 @@ export default class WebhookService {
         this.redisClient = new RedisClient();
     }
 
-    getCachedData = async (provider: Provider): Promise<ProviderOutput> => {
+    private getWebhookPayload = async (
+        provider: Provider
+    ): Promise<WebhookPayload> => {
         try {
-            return this.redisClient.getCachedProviderResponse(provider);
+            const { data } = await ProviderClient.getProviderResponse(provider);
+            return webhookPayloadSuccess(data);
         } catch (error) {
-            console.error(error);
-            return [];
+            return this.redisClient.getCachedWebhookPayload(provider);
         }
     };
 
-    getData = async (provider: Provider): Promise<ProviderOutput> => {
-        try {
-            const providerResponse = await getProviderResponse(provider);
-            return providerResponse.data;
-        } catch (error) {
-            return this.getCachedData(provider);
-        }
-    };
-
-    private async sendToCallbackUrl(callbackUrl: string, data: ProviderOutput) {
+    private async sendToCallbackUrl(callbackUrl: string, data: WebhookPayload) {
         return axios.post(callbackUrl, data);
     }
 
-    sendPayload = async ({ provider, callbackUrl }: ConsumeInput) => {
-        const dataToSend = await this.getData(provider);
-        const [response, _] = await Promise.all([
-            this.sendToCallbackUrl(callbackUrl, dataToSend),
-            this.redisClient.setCachedProviderResponse(provider, dataToSend),
+    sendPayload = async ({ provider, callbackUrl }: WebhookRequestInput) => {
+        const payload = await this.getWebhookPayload(provider);
+        const [response] = await Promise.all([
+            this.sendToCallbackUrl(callbackUrl, payload),
+            this.redisClient.maybeSetCachedWebhookPayloadSuccess(
+                provider,
+                payload
+            ),
         ]);
         return response;
     };

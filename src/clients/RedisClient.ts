@@ -1,6 +1,11 @@
 import Redis from "ioredis";
-import { HttpError } from "../utils/HttpError";
-import { isProviderOutput, Provider, ProviderOutput } from "../types";
+import HttpError from "../utils/HttpError";
+import {
+    isWebhookPayloadSuccess,
+    Provider,
+    WebhookPayload,
+    webhookPayloadFailure,
+} from "../types";
 
 export default class RedisClient {
     redis: Redis.Redis;
@@ -9,30 +14,31 @@ export default class RedisClient {
         this.redis = new Redis();
     }
 
-    private notFoundError() {
-        return HttpError.notFound(
-            "No data was found for this provider. Please try again later."
-        );
+    async getCachedWebhookPayload(provider: Provider): Promise<WebhookPayload> {
+        try {
+            const cachedResponse = await this.redis.get(provider);
+            if (!cachedResponse) {
+                throw HttpError.notFound();
+            }
+            const parsedCachedResponse = JSON.parse(cachedResponse);
+            if (!isWebhookPayloadSuccess(parsedCachedResponse)) {
+                throw HttpError.notFound();
+            }
+            return parsedCachedResponse;
+        } catch (error) {
+            console.error(error);
+            return webhookPayloadFailure(
+                "The provider could not be reached and no cached data are available. Please try again later."
+            );
+        }
     }
 
-    async getCachedProviderResponse(
-        provider: Provider
-    ): Promise<ProviderOutput> {
-        const cachedResponse = await this.redis.get(provider);
-        if (!cachedResponse) {
-            throw this.notFoundError();
-        }
-        const parsedCachedResponse = JSON.parse(cachedResponse);
-        if (!isProviderOutput(parsedCachedResponse)) {
-            throw this.notFoundError();
-        }
-        return parsedCachedResponse;
-    }
-
-    async setCachedProviderResponse(
+    async maybeSetCachedWebhookPayloadSuccess(
         provider: Provider,
-        data: ProviderOutput
+        data: WebhookPayload
     ): Promise<void> {
-        await this.redis.set(provider, JSON.stringify(data));
+        if (isWebhookPayloadSuccess(data)) {
+            await this.redis.set(provider, JSON.stringify(data));
+        }
     }
 }

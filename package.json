@@ -7,7 +7,8 @@
         "build": "tsc",
         "start": "docker-compose up --build -d",
         "stop": "docker-compose down",
-        "test": "npm run start && jest --forceExit"
+        "test": "npm run start && jest --forceExit",
+        "coverage": "npm run start && jest --coverage --forceExit"
     },
     "keywords": [],
     "author": "",
