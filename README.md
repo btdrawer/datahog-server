@@ -51,3 +51,14 @@ Assuming the request body is valid, the API will return a `200`, collect billing
     "lastUpdated": "2021-01-01T10:00:00Z"
 }
 ```
+
+**Note**: The `lastUpdated` field is provided because sometimes, the provider may be unavailable, and if so then the server will send a cached response which may be out of date.
+
+If the provider is unavailable and no data has been cached, the server will instead send the following payload:
+
+```
+{
+    "success": false,
+    "message": "The provider could not be reached and no cached data are available. Please try again later."
+}
+```
