@@ -1,5 +1,5 @@
-import { Provider } from ".";
-import { isProviderData, ProviderData } from "./Provider";
+import { Provider, isProviderData, ProviderData } from "./Provider";
+import generateDateTime from "../utils/generateDateTime";
 
 export interface WebhookPayloadSuccess {
     success: true;
@@ -24,7 +24,7 @@ export const webhookPayloadSuccess = (
         success: true,
         provider,
         data,
-        lastUpdated: Date.now().toString(),
+        lastUpdated: generateDateTime(),
     };
 };
 

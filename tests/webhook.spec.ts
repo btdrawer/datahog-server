@@ -49,16 +49,16 @@ describe("Webhook", () => {
 
                 await setTimeoutPromise(1000);
 
-                const WebhookPayloadSuccess =
+                const webhookPayloadSuccess =
                     requestBody as WebhookPayloadSuccess;
-                expect(WebhookPayloadSuccess).toEqual(
+                expect(webhookPayloadSuccess).toEqual(
                     expect.objectContaining(
                         exampleWebhookPayloadSuccessWithoutLastUpdated(
                             Provider.Internet
                         )
                     )
                 );
-                expect(WebhookPayloadSuccess.lastUpdated).toBeDefined();
+                expect(webhookPayloadSuccess.lastUpdated).toBeDefined();
             });
     });
 
@@ -83,16 +83,16 @@ describe("Webhook", () => {
 
                 await setTimeoutPromise(1000);
 
-                const WebhookPayloadSuccess =
+                const webhookPayloadSuccess =
                     requestBody as WebhookPayloadSuccess;
-                expect(WebhookPayloadSuccess).toEqual(
+                expect(webhookPayloadSuccess).toEqual(
                     expect.objectContaining(
                         exampleWebhookPayloadSuccessWithoutLastUpdated(
                             Provider.Gas
                         )
                     )
                 );
-                expect(WebhookPayloadSuccess.lastUpdated).toBeDefined();
+                expect(webhookPayloadSuccess.lastUpdated).toBeDefined();
             });
     });
 
@@ -124,9 +124,12 @@ describe("Webhook", () => {
     });
 
     it("should send cached body when provider is unavailable", async () => {
+        const cachedWebhookPayloadSuccess = exampleWebhookPayloadSuccess(
+            Provider.Gas
+        );
         await redisClient.maybeSetCachedWebhookPayloadSuccess(
             Provider.Gas,
-            exampleWebhookPayloadSuccess(Provider.Gas)
+            cachedWebhookPayloadSuccess
         );
         mockFailedGasProviderResponse();
 
@@ -148,16 +151,11 @@ describe("Webhook", () => {
 
                 await setTimeoutPromise(1000);
 
-                const WebhookPayloadSuccess =
+                const webhookPayloadSuccess =
                     requestBody as WebhookPayloadSuccess;
-                expect(WebhookPayloadSuccess).toEqual(
-                    expect.objectContaining(
-                        exampleWebhookPayloadSuccessWithoutLastUpdated(
-                            Provider.Gas
-                        )
-                    )
+                expect(webhookPayloadSuccess).toEqual(
+                    cachedWebhookPayloadSuccess
                 );
-                expect(WebhookPayloadSuccess.lastUpdated).toBeDefined();
             });
     });
 
@@ -183,9 +181,9 @@ describe("Webhook", () => {
 
                 await setTimeoutPromise(2000);
 
-                const WebhookPayloadFailure =
+                const webhookPayloadFailure =
                     requestBody as WebhookPayloadFailure;
-                expect(WebhookPayloadFailure).toEqual(
+                expect(webhookPayloadFailure).toEqual(
                     exampleWebhookPayloadFailureNoCachedData(Provider.Gas)
                 );
             });
@@ -218,9 +216,9 @@ describe("Webhook", () => {
 
                 await setTimeoutPromise(2000);
 
-                const WebhookPayloadFailure =
+                const webhookPayloadFailure =
                     requestBody as WebhookPayloadFailure;
-                expect(WebhookPayloadFailure).toEqual(
+                expect(webhookPayloadFailure).toEqual(
                     exampleWebhookPayloadFailureNoCachedData(Provider.Gas)
                 );
             });
